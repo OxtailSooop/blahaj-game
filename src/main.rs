@@ -159,7 +159,8 @@ fn reproduce(
         commands.spawn((
             SceneBundle {
                 scene: asset.load("low_poly_blahaj/mod.gltf#Scene0"),
-                transform: Transform::from_scale(Vec3::new(0.8, 0.8, 0.8)),
+                transform: Transform::from_scale(Vec3::new(0.8, 0.8, 0.8))
+                    .with_translation(player.single().translation),
                 ..default()
             },
             Blahaj {
