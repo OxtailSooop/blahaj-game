@@ -12,7 +12,8 @@ pub struct CameraControllerPlugin;
 
 impl Plugin for CameraControllerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, run_camera_controller);
+        app.add_systems(Startup, init_camera_controller)
+            .add_systems(Update, run_camera_controller);
     }
 }
 
@@ -40,6 +41,7 @@ pub struct CameraController {
     pub pitch: f32,
     pub yaw: f32,
     pub velocity: Vec3,
+    pub toggle_cursor_grab: bool,
 }
 
 impl Default for CameraController {
@@ -62,7 +64,19 @@ impl Default for CameraController {
             pitch: 0.0,
             yaw: 0.0,
             velocity: Vec3::ZERO,
+            toggle_cursor_grab: true,
         }
+    }
+}
+
+fn init_camera_controller(mut windows: Query<&mut Window>) {
+    for mut window in &mut windows {
+        if !window.focused {
+            continue;
+        }
+
+        window.cursor.grab_mode = CursorGrabMode::Locked;
+        window.cursor.visible = false;
     }
 }
 
@@ -72,7 +86,6 @@ fn run_camera_controller(
     mut windows: Query<&mut Window>,
     mut mouse_events: EventReader<MouseMotion>,
     key_input: Res<ButtonInput<KeyCode>>,
-    mut toggle_cursor_grab: Local<bool>,
     mut query: Query<(&mut Transform, &mut CameraController), With<Camera>>,
 ) {
     let dt = time.delta_seconds();
@@ -91,28 +104,30 @@ fn run_camera_controller(
 
         // Handle key input
         let mut axis_input = Vec3::ZERO;
-        if key_input.pressed(controller.key_forward) {
-            axis_input.z += 1.0;
-        }
-        if key_input.pressed(controller.key_back) {
-            axis_input.z -= 1.0;
-        }
-        if key_input.pressed(controller.key_right) {
-            axis_input.x += 1.0;
-        }
-        if key_input.pressed(controller.key_left) {
-            axis_input.x -= 1.0;
-        }
-        if key_input.pressed(controller.key_up) {
-            axis_input.y += 1.0;
-        }
-        if key_input.pressed(controller.key_down) {
-            axis_input.y -= 1.0;
+        if controller.toggle_cursor_grab {
+            if key_input.pressed(controller.key_forward) {
+                axis_input.z += 1.0;
+            }
+            if key_input.pressed(controller.key_back) {
+                axis_input.z -= 1.0;
+            }
+            if key_input.pressed(controller.key_right) {
+                axis_input.x += 1.0;
+            }
+            if key_input.pressed(controller.key_left) {
+                axis_input.x -= 1.0;
+            }
+            if key_input.pressed(controller.key_up) {
+                axis_input.y += 1.0;
+            }
+            if key_input.pressed(controller.key_down) {
+                axis_input.y -= 1.0;
+            }
         }
 
         let mut cursor_grab_change = false;
         if key_input.just_pressed(controller.keyboard_key_toggle_cursor_grab) {
-            *toggle_cursor_grab = !*toggle_cursor_grab;
+            controller.toggle_cursor_grab = !controller.toggle_cursor_grab;
             cursor_grab_change = true;
         }
 
@@ -139,7 +154,7 @@ fn run_camera_controller(
 
         // Handle cursor grab
         if cursor_grab_change {
-            if *toggle_cursor_grab {
+            if controller.toggle_cursor_grab {
                 for mut window in &mut windows {
                     if !window.focused {
                         continue;
@@ -158,7 +173,7 @@ fn run_camera_controller(
 
         // Handle mouse input
         let mut mouse_delta = Vec2::ZERO;
-        if *toggle_cursor_grab {
+        if controller.toggle_cursor_grab {
             for mouse_event in mouse_events.read() {
                 mouse_delta += mouse_event.delta;
             }
