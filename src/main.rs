@@ -1,4 +1,5 @@
 use bevy::audio::PlaybackSettings;
+use bevy::color::Color;
 use bevy::prelude::{AudioSinkPlayback, IntoSystemConfigs, ResMut, Resource};
 use bevy::time::Time;
 use bevy::{
@@ -9,7 +10,7 @@ use bevy::{
     math::Vec3,
     pbr::PointLightBundle,
     prelude::{Camera3dBundle, Commands, Component, KeyCode, Query, Res, With},
-    render::{camera::ClearColor, color::Color},
+    render::camera::ClearColor,
     scene::SceneBundle,
     text::{JustifyText, TextStyle},
     transform::components::Transform,
@@ -51,7 +52,7 @@ fn main() {
                 reproduce,
             ),
         )
-        .insert_resource(ClearColor(Color::rgb(0.9, 0.3, 0.6)))
+        .insert_resource(ClearColor(Color::srgb(0.9, 0.3, 0.6)))
         .insert_resource(BlahajGame {
             spin_speed: 1.0,
             paused: false,
