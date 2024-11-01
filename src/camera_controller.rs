@@ -69,14 +69,19 @@ impl Default for CameraController {
     }
 }
 
-fn init_camera_controller(mut windows: Query<&mut Window>) {
-    for mut window in &mut windows {
-        if !window.focused {
-            continue;
-        }
+fn init_camera_controller(
+    query: Query<&CameraController, With<Camera>>,
+    mut windows: Query<&mut Window>,
+) {
+    if query.single().toggle_cursor_grab {
+        for mut window in &mut windows {
+            if !window.focused {
+                continue;
+            }
 
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        window.cursor.visible = false;
+            window.cursor.grab_mode = CursorGrabMode::Locked;
+            window.cursor.visible = false;
+        }
     }
 }
 
