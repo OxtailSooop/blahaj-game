@@ -12,8 +12,7 @@ pub struct CameraControllerPlugin;
 
 impl Plugin for CameraControllerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, init_camera_controller)
-            .add_systems(Update, run_camera_controller);
+        app.add_systems(Update, run_camera_controller);
     }
 }
 
@@ -69,22 +68,6 @@ impl Default for CameraController {
     }
 }
 
-fn init_camera_controller(
-    query: Query<&CameraController, With<Camera>>,
-    mut windows: Query<&mut Window>,
-) {
-    if query.single().toggle_cursor_grab {
-        for mut window in &mut windows {
-            if !window.focused {
-                continue;
-            }
-
-            window.cursor.grab_mode = CursorGrabMode::Locked;
-            window.cursor.visible = false;
-        }
-    }
-}
-
 #[allow(clippy::too_many_arguments)]
 fn run_camera_controller(
     time: Res<Time>,
@@ -93,7 +76,7 @@ fn run_camera_controller(
     key_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut CameraController), With<Camera>>,
 ) {
-    let dt = time.delta_seconds();
+    let dt = time.delta().as_secs_f32();
 
     if let Ok((mut transform, mut controller)) = query.get_single_mut() {
         if !controller.initialized {
@@ -101,6 +84,19 @@ fn run_camera_controller(
             controller.yaw = yaw;
             controller.pitch = pitch;
             controller.initialized = true;
+
+            if !controller.toggle_cursor_grab {
+                return;
+            }
+
+            for mut window in &mut windows {
+                if !window.focused {
+                    continue;
+                }
+
+                window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                window.cursor_options.visible = false;
+            }
         }
         if !controller.enabled {
             mouse_events.clear();
@@ -165,13 +161,13 @@ fn run_camera_controller(
                         continue;
                     }
 
-                    window.cursor.grab_mode = CursorGrabMode::Locked;
-                    window.cursor.visible = false;
+                    window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                    window.cursor_options.visible = false;
                 }
             } else {
                 for mut window in &mut windows {
-                    window.cursor.grab_mode = CursorGrabMode::None;
-                    window.cursor.visible = true;
+                    window.cursor_options.grab_mode = CursorGrabMode::None;
+                    window.cursor_options.visible = true;
                 }
             }
         }
