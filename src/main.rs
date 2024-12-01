@@ -3,8 +3,7 @@ use bevy::color::Color;
 use bevy::gltf::GltfAssetLabel;
 use bevy::pbr::PointLight;
 use bevy::prelude::{
-    AudioSinkPlayback, Camera3d, ImageNode, IntoSystemConfigs, ResMut,
-    Resource, Text,
+    AudioSinkPlayback, Camera3d, ImageNode, IntoSystemConfigs, ResMut, Resource, Text,
 };
 use bevy::scene::SceneRoot;
 use bevy::text::{TextFont, TextLayout};
@@ -112,8 +111,11 @@ fn spawn_player(asset: Res<AssetServer>, mut commands: Commands) {
         },
     ));
 
-    commands
-        .spawn((Transform::from_xyz(0.0, 0.0, 3.0), Camera3d::default(), CameraController { ..default() }));
+    commands.spawn((
+        Transform::from_xyz(0.0, 0.0, 3.0),
+        Camera3d::default(),
+        CameraController { ..default() },
+    ));
 }
 
 fn control_blahaj(
